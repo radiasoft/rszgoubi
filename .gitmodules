@@ -1,0 +1,3 @@
+[submodule "deps/zgoubi"]
+	path = deps/zgoubi
+	url = /Users/elventear/Projects/radiasoft/zgoubi
