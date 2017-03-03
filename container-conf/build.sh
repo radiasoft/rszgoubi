@@ -5,7 +5,7 @@ zgoubi_dir=/src/zgoubi
 build_zgoubi() {
     svn co https://svn.code.sf.net/p/zgoubi/code/trunk "$zgoubi_dir"
     cd "$zgoubi_dir"
-    make -f Makefile_zgoubi_gfortran 
+    make -j 4 -f Makefile_zgoubi_gfortran 
 }
 
 build_as_run_user() {
