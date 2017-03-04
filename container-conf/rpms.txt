@@ -1,5 +1,4 @@
 gcc-gfortran
-ghostscript
 git
 glibc-locale-source
 htop
@@ -7,9 +6,6 @@ make
 procps
 python3-pip
 python3-virtualenv
-svn
-texlive-scheme-small
-texlive-wrapfig
 the_silver_searcher
 tmux
 valgrind
