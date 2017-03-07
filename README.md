@@ -1,4 +1,4 @@
-### rszgoubi
+### rszgoubi [![Build Status](https://travis-ci.org/radiasoft/rszgoubi.svg?branch=master)](https://travis-ci.org/radiasoft/rszgoubi)
 
 Python library for working with the Zgoubi spin dynamics code
 
