@@ -2,6 +2,10 @@
 
 set -e -u -o pipefail
 
+# ./pzgrunner.sh /path/to/results/root/dir /path/to/inputs/dir zgoubi_command
+# Runs zgrunner.sh in parallel. Will use the input dir to search for '*.res' files,
+# which will be passed with the other parameters to zgrunner.sh
+
 main() {
     results_root=$1
     shift
