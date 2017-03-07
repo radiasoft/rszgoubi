@@ -49,9 +49,18 @@ prepare_results_environment() {
 }
 
 run_cmd() {
+    case "$(uname -s)" in
+        Darwin)
+            time_cmd="$(which gtime)"
+            ;;
+        Linux)
+            time_cmd="$(which time)"
+            ;;
+    esac
+
     (
     cd $exec_dir
-    eval "$cmd"
+    eval "$time_cmd -v $cmd" 2>&1 | tee outerr.txt
     )
 }
 
