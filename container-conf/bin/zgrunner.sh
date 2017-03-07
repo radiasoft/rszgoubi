@@ -33,8 +33,8 @@ prepare_results_environment() {
     local fp="$(realpath $zgoubi_input)"
     local d="$(dirname $fp)"
     local fn="$(basename $fp)"
-    
-    exec_dir="$results_root/$fn"
+
+    exec_dir="$results_root/$(basename $d)_$fn"
 
     test -d "$exec_dir" && error_msg "$exec_dir already exists"
 
@@ -60,7 +60,15 @@ run_cmd() {
 
     (
     cd $exec_dir
-    eval "$time_cmd -v $cmd" 2>&1 | tee outerr.txt
+
+    set +e
+    eval "$time_cmd -v $cmd" 2> stderr.log 1> stdout.log
+    set -e
+
+    local err=$?
+    if [[ $err -ne 0 ]]; then
+        echo $err > failed.txt 
+    fi
     )
 }
 
