@@ -6,6 +6,8 @@ set -e -u -o pipefail
 # Given an input file, the runner prepares an output directory, located in the results dir. 
 # Then it will execute zgoubi_command to run the simulation.
 
+# Requires GNU Time, to run from non-linux environment pass the path to GNU Time via the env time_cmd
+
 error_msg() {
     echo "ERROR: $1"
     exit 1
@@ -39,7 +41,7 @@ prepare_results_environment() {
     test -d "$exec_dir" && error_msg "$exec_dir already exists"
 
     mkdir "$exec_dir"
-    cp -pLR "$d/" "$exec_dir"
+    cp -pLR "$d"/* "$exec_dir"
     (
     cd "$exec_dir"
     mv "$fn" _zg_tmp
@@ -49,23 +51,18 @@ prepare_results_environment() {
 }
 
 run_cmd() {
-    case "$(uname -s)" in
-        Darwin)
-            time_cmd="$(which gtime)"
-            ;;
-        Linux)
-            time_cmd="$(which time)"
-            ;;
-    esac
+    if [[ -z ${time_cmd+x} ]]; then
+        time_cmd=/usr/bin/time
+    fi
 
     (
     cd $exec_dir
 
     set +e
     eval "$time_cmd -v $cmd" 2> stderr.log 1> stdout.log
+    local err=$?
     set -e
 
-    local err=$?
     if [[ $err -ne 0 ]]; then
         echo $err > failed.txt 
     fi

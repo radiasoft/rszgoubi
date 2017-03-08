@@ -3,10 +3,12 @@ git
 glibc-locale-source
 htop
 make
+parallel
 procps
 python3-pip
 python3-virtualenv
 the_silver_searcher
+time
 tmux
 valgrind
 vim-enhanced
