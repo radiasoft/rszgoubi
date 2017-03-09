@@ -36,14 +36,16 @@ prepare_results_environment() {
     local d="$(dirname $fp)"
     local fn="$(basename $fp)"
 
-    exec_dir="$results_root/$(basename $d)_$fn"
+    exec_dir="$results_root/$(uuid -v4)"
 
     test -d "$exec_dir" && error_msg "$exec_dir already exists"
+
 
     mkdir "$exec_dir"
     cp -pLR "$d"/* "$exec_dir"
     (
     cd "$exec_dir"
+    echo $zgoubi_input > zgoubi_info.txt
     mv "$fn" _zg_tmp
     rm -f *.dat *.res
     mv _zg_tmp zgoubi.dat

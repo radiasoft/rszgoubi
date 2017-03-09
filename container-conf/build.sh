@@ -9,6 +9,13 @@ build_zgoubi() {
     ln -s "$zgoubi_dir/zgoubi/zgoubi" "$bin_dir"
 }
 
+build_as_root() {
+    cp ./bin/rszgoubi-run.sh /rszgoubi-run.sh
+    chmod ugo+rx /rszgoubi-run.sh
+    mkdir /zgoubi_results
+    chown vagrant: /zgoubi_results 
+}
+
 build_as_run_user() {
     (build_zgoubi)
     (install_runners)
