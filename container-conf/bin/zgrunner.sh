@@ -67,6 +67,7 @@ run_cmd() {
 
     if [[ $err -ne 0 ]]; then
         echo $err > failed.txt 
+        exit $err
     fi
     )
 }
