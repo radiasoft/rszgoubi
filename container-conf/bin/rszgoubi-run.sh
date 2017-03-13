@@ -2,4 +2,4 @@
 
 set -e -u -o pipefail
 
-exec pzgrunner.sh /zgoubi_results $HOME/src/zgoubi/exemples "$@"
+exec pzgrunner.sh /zgoubi_results /zgoubi_examples "$@"

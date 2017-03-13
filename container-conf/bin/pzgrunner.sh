@@ -17,7 +17,7 @@ main() {
 
     script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-    find "$zgoubi_input_root" -name '*.res' \
+    find "$zgoubi_input_root" -iname '*.res' -o -iname '*.dat' \
         | parallel realpath | sort -u \
         | parallel --joblog "$results_root/parallel.log" \
             --eta "$script_dir/zgrunner.sh" "$results_root" {} "$cmd"
