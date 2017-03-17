@@ -24,6 +24,10 @@ EOF
 
 run_as_user() {
     git clone https://github.com/radiasoft/rszgoubi.git "$HOME/rszgoubi"
+    (
+    cd "HOME/rszgoubi"
+    git remote add radiasoft git@github.com:radiasoft/rszgoubi.git
+    )
 }
 
 main "$@"
