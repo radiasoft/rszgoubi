@@ -1,6 +1,8 @@
 #!/bin/bash
 
 set -eu -o pipefail
+    
+rszgoubi_repo="$HOME/rszgoubi"
 
 do_reboot() {
     sudo shutdown -r +1
@@ -27,8 +29,6 @@ _git() {
 }
 
 run_as_user() {
-    export rszgoubi_repo="$HOME/rszgoubi"
-
     if [[ ! -d "$rszgoubi_repo" ]]; then
         git clone https://github.com/radiasoft/rszgoubi.git "$rszgoubi_repo"
     fi
