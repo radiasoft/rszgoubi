@@ -22,12 +22,18 @@ sudo -s -- <<EOF
 EOF
 }
 
+_git() {
+    git "--git-dir=$rszgoubi_repo/.git" "$@"
+}
+
 run_as_user() {
-    git clone https://github.com/radiasoft/rszgoubi.git "$HOME/rszgoubi"
-    (
-    cd "HOME/rszgoubi"
-    git remote add radiasoft git@github.com:radiasoft/rszgoubi.git
-    )
+    export rszgoubi_repo="$HOME/rszgoubi"
+
+    if [[ ! -d "$rszgoubi_repo" ]]; then
+        git clone https://github.com/radiasoft/rszgoubi.git "$rszgoubi_repo"
+    fi
+
+    _git remote -v | grep -q radiasoft || _git remote add radiasoft git@github.com:radiasoft/rszgoubi.git
 }
 
 main "$@"
