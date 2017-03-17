@@ -49,10 +49,28 @@ resource "aws_instance" "default" {
     tags {
       Name = "rszgoubi-compute"
     }
+}
+
+resource "aws_key_pair" "default" {
+    key_name = "rszgoubi-compute"
+    public_key = "${file("ssh/id_rsa.pub")}"
+}
+
+resource "null_resource" "provision" {
+    triggers {
+        instance_id = "${aws_instance.default.id}"
+    }
+
+    connection {
+        agent       = false
+        host        = "${aws_instance.default.public_ip}" 
+        private_key = "${file("ssh/id_rsa")}"
+        user        = "fedora"
+    }
 
     provisioner "file" {
         source      = "files/provision.sh"
-        description = "/tmp/provision.sh"
+        destination = "/tmp/provision.sh"
     }
 
     provisioner "remote-exec" {
@@ -60,10 +78,5 @@ resource "aws_instance" "default" {
             "bash /tmp/provision.sh"
         ]
     }
-}
-
-resource "aws_key_pair" "default" {
-    key_name = "rszgoubi-compute"
-    public_key = "${file("ssh/id_rsa.pub")}"
 }
 
