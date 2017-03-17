@@ -49,6 +49,17 @@ resource "aws_instance" "default" {
     tags {
       Name = "rszgoubi-compute"
     }
+
+    provisioner "file" {
+        source      = "files/provision.sh"
+        description = "/tmp/provision.sh"
+    }
+
+    provisioner "remote-exec" {
+        inline = [
+            "bash /tmp/provision.sh"
+        ]
+    }
 }
 
 resource "aws_key_pair" "default" {
