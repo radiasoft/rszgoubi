@@ -21,6 +21,7 @@ sudo -s -- <<EOF
     systemctl enable docker.service
     systemctl start docker.service 
     docker pull radiasoft/rszgoubi:latest
+    sed -i -e 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 EOF
 }
 

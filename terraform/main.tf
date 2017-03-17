@@ -50,6 +50,12 @@ resource "aws_instance" "default" {
     security_groups = ["${aws_security_group.default.name}"]
 
     associate_public_ip_address = true
+
+    root_block_device {
+        iops        = 100
+        volume_size = 50 
+        volume_type = "gp2"
+    }
   
     #Instance tags
     tags {
@@ -64,7 +70,7 @@ resource "aws_key_pair" "default" {
 
 resource "null_resource" "provision" {
     triggers {
-        instance_id = "${aws_instance.default.id}"
+         instance_ids = "${join(",", aws_instance.default.*.id)}"
     }
 
     connection {
