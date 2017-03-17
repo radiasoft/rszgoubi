@@ -19,7 +19,7 @@ main() {
 
     find "$zgoubi_input_root" -iname '*.res' -o -iname '*.dat' \
         | parallel realpath | sort -u \
-        | parallel --joblog "$results_root/parallel.log" \
+        | parallel --joblog "$results_root/parallel.log" --shuf \
             --eta "$script_dir/zgrunner.sh" "$results_root" {} "$cmd"
 }
 

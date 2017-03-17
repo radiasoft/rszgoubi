@@ -5,11 +5,6 @@ provider "aws" {
     region = "${var.aws_region}"
 }
 
-resource "aws_eip" "default" {
-    instance = "${aws_instance.default.id}"
-    vpc      = true
-}
-
 # Our default security group to access
 # the instances over SSH and HTTP
 resource "aws_security_group" "default" {
@@ -23,6 +18,15 @@ resource "aws_security_group" "default" {
       protocol    = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
     }
+
+    # inbound ICMP allowed
+    ingress {
+        from_port = 8
+        to_port   = 0
+        protocol  = "icmp"
+
+        cidr_blocks = ["0.0.0.0/0"]
+    }
     
     # outbound internet access
     egress {
@@ -34,7 +38,7 @@ resource "aws_security_group" "default" {
 }
 
 resource "aws_instance" "default" {
-    instance_type = "t2.micro"
+    instance_type = "c4.2xlarge"
   
     # Lookup the correct AMI based on the region
     # we specified
@@ -44,6 +48,8 @@ resource "aws_instance" "default" {
   
     # Our Security group to allow HTTP and SSH access
     security_groups = ["${aws_security_group.default.name}"]
+
+    associate_public_ip_address = true
   
     #Instance tags
     tags {
@@ -63,7 +69,7 @@ resource "null_resource" "provision" {
 
     connection {
         agent       = false
-        host        = "${aws_eip.default.public_ip}" 
+        host        = "${aws_instance.default.public_ip}" 
         private_key = "${file("ssh/id_rsa")}"
         user        = "fedora"
     }
