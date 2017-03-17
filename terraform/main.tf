@@ -63,7 +63,7 @@ resource "null_resource" "provision" {
 
     connection {
         agent       = false
-        host        = "${aws_instance.default.public_ip}" 
+        host        = "${aws_eip.default.public_ip}" 
         private_key = "${file("ssh/id_rsa")}"
         user        = "fedora"
     }
