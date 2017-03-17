@@ -17,7 +17,7 @@ main() {
 run_as_root() {
 sudo -s -- <<EOF
     dnf upgrade -y
-    dnf install -y htop tmux vim-enhanced docker git
+    dnf install -y htop tmux vim-enhanced docker git gettext
     systemctl enable docker.service
     systemctl start docker.service 
     docker pull radiasoft/rszgoubi:latest
@@ -30,11 +30,13 @@ _git() {
 }
 
 run_as_user() {
+    test -d "$HOME/tmp" || mkdir "$HOME/tmp"
+
     if [[ ! -d "$rszgoubi_repo" ]]; then
         git clone https://github.com/radiasoft/rszgoubi.git "$rszgoubi_repo"
     fi
 
-    _git remote -v | grep -q radiasoft || _git remote add radiasoft git@github.com:radiasoft/rszgoubi.git
+    _git remote | grep -q radiasoft || _git remote add radiasoft git@github.com:radiasoft/rszgoubi.git
 }
 
 main "$@"
