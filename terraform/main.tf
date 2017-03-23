@@ -38,7 +38,7 @@ resource "aws_security_group" "default" {
 }
 
 resource "aws_instance" "default" {
-    instance_type = "c4.2xlarge"
+    instance_type = "c4.large"
   
     # Lookup the correct AMI based on the region
     # we specified
