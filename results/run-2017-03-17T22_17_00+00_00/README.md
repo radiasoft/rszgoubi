@@ -12,13 +12,13 @@ Based of the `SRDampingInESRFRing-coupled` we [generated](../../examples/SRDampi
 
 ### Execution Profiling
 
-To gather information about the execution we used [Valgrind](http://www.valgrind.org), enabling cache and branch analysis. The commandline to invoke Valgrind with these setting is:
+To gather information about the execution we used [Valgrind](http://www.valgrind.org), with cache and branch analysis enabled. The commandline to invoke Valgrind with these setting is:
 
 ```sh
 valgrind --tool=callgrind --cache-sim=yes --branch-sim=yes zgoubi
 ```
 
-Since Valgrind is a virtual execution environment, it does not achieve native execution speed of the application; we have observed slowdowns of more than 70x, so in order to make the profiling feasible it is only possible to execute examples with restricted run times.
+Since Valgrind is a virtual execution environment, it does not achieve native execution speed of the application. We have observed slowdowns of more than 70x; so in order to make the profiling feasible it is only possible to execute examples with restricted run times.
 
 ### Execution environment
 
@@ -39,31 +39,64 @@ The figure below contains a tree based visualization of the call tree; for sake 
 
 <img src="images/call_tree.png" alt="Drawing" style="width: 800px;"/>
 
-From the previous graph we can see a some of the functions that could be likely candidates for optimization, due to their cumulative costs: *devtra*, *chamc* and *cofin*. It is important to distinguish what is the individual execution of the function, versus the cumulative execution costs of the function plus its children functions. The best candidates will have a high cumulative cost and high individual cost.
+From the previous graph we can see a some of the functions that could be likely candidates for optimization due to their cumulative costs. It is important to distinguish between the individual execution costs versus the cumulative execution costs (which include execution costs of other functions). The best candidates will have a high cumulative cost and high individual cost.
 
-In the table below we see a list of all the functions used in zgoubi, listed by individual execution cost (*Self*). We can notize that indeed *devtra* has a relatively high cumulative and individual execution cost. Another function with a high is `sincos`
+In the table below we see a list of all the functions used in zgoubi, listed by individual execution cost (*Self*). It is of note that *devtra* has a relatively high cumulative and individual execution cost. Another function with a high is cost is `sincos`.
 
 <img src="images/funcs_self_cost.png" alt="Drawing" style="width: 400px;"/>
 
 ### `devtra`
 
-The execution costs used previously as what Valgrind terms *Cycle Costs* which is a combined score of several metrics it gathers while profiling. In order to get a better sense of the areas where each individual function could be improved we could see a break down for the metrics.
-
-Below is a table with the full metrics collected for *devtra*. Some costs in the list are unavoidable, e.g. *Instruction Fetch*. But others could be minimized if the program structure is improved, for example, we can see in the table that *Mispredicted Cond. Branch* (Bcm) and *Indirect Branch* (Bi) have a high execution cost. 
+Execution costs (termed *Cycle Costs* by Valgrind) can be broken down into several metrics. Below is a table with the full metrics collected for *devtra*. Some costs in the list are unavoidable, e.g. *Instruction Fetch*. But others could be minimized if the program structure is improved, for example, we can see in the table that *Mispredicted Cond. Branch* (Bcm) and *Indirect Branch* (Bi) have a high execution cost. 
 
 <img src="images/devtra_cost.png" alt="Drawing" style="width: 400px;"/>
 
-If we inspect the [`devtra.f`](https://github.com/radiasoft/zgoubi/blob/3d77b37a33a02050a15a29e57166a5d03f55f90c/zgoubi/devtra.f#L130), we can see that the subroutine uses many loops, some of the them are nested and within the loops there is conditional branching. Branching can severely affect the performance of [superscalar processors](https://en.wikipedia.org/wiki/Superscalar_processor), and conditional operations and loops use branching heavily at the processor level.
+If we inspect [`devtra.f`](https://github.com/radiasoft/zgoubi/blob/3d77b37a33a02050a15a29e57166a5d03f55f90c/zgoubi/devtra.f#L130), we can see that the subroutine uses many loops, some of the them are nested and within the loops there is conditional branching:
 
-To avoid these issues processors and compilers have built in several features that allow sidestepping pitfalls related to branching:
+```fortran
+CALCUL B''=d2B/ds2
+      KIJM = -IJMAX-IMAX
+      KIM = -IMAX
+      DO 15 K=1,3                                         <<<<< Loop
+        TP=0.D0
+        IF(IDB.GE.1) THEN                                 <<<<< Nested conditional
+          KIJM = KIJM + IJMAX
+          KIM = KIM + IMAX
+          DO 14 I=1,3                                     <<<<< Nested loop
+            IK = I + KIM
+            TP=TP+U(2,I)*DB(IK)
+C
+C           symetrie
+C
+            IF(IDB.GE.2) THEN                             <<<<< Nested conditional
+              IKIJ = I + KIJM
+              DO 141 J=I,3                                <<<<< Nested loop
+                IF(I .EQ. J) THEN                         <<<<< Nested conditional
+                  XMUL=1.0D0
+                ELSE
+                  XMUL=2.0D0
+                ENDIF
+                IJK = IKIJ + J*IMAX
+                TP=TP+XMUL*U(1,I)*U(1,J)*DDB(IJK)
+ 141          CONTINUE
+            ENDIF
+ 14       CONTINUE
+        ENDIF
+        B(3,K)=TP
+ 15   CONTINUE
+```
 
-* Branch prediction: processors keep statistics of execution so that a branch target can be predicted and the right source of data is continously loaded in the processor, which avoid stalling the computation process. These statistics are very shallow, so if we have many branching operations (e.g. nested loops with nested conditionals), the predictor will not be effective. A solution is to use loop unrolling, avoid nesting loops and conditionals within another loop.
+Branching can severely affect the performance of [superscalar processors](https://en.wikipedia.org/wiki/Superscalar_processor), and conditional operations and loops use branching heavily at the processor level.
+
+To avoid these issues processors and compilers have built in several features that allow improving branching performance:
+
+* Branch prediction: processors keep statistics of execution so that a branch target can be predicted and the right source of data is continously loaded in the processor, to avoid pipeline stalls. These statistics are very shallow, so if we have many branching operations (e.g. nested loops with nested conditionals), the predictor will not be effective. A solution is to use loop unrolling, avoid nesting loops and conditionals within another loop.
 
 * Vectorization: compilers can also transform operations written in scalar form to leverage vector operations within the processor that are much faster. Writing code that can be effectively vectorized can be a bit of black magic, but in general it requires simplifying the algorithm so that the compiler can recognize that the optimization can be applied. Costs related to *Data Read Access* or *Data Write Access* can be lessened with proper optimization.
 
 ### `sincos`
 
-Operations like `sincos` that are implemented outside zgoubi also have a very high execution cost on the application. If the trigonometric function could be reimplemented such that some accuracy could be traded for speed, while maintaing the results within an acceptable range of accuracy, then additional gains could be gleaned from this approach.
+Operations like `sincos` that are implemented outside zgoubi also have a very high execution cost on the application. If the trigonometric function could be reimplemented such that some accuracy could be traded for speed, while maintaing the results within an acceptable range of accuracy, then additional gains could be obtained.
 
 ## Discussion
 
@@ -79,4 +112,4 @@ A sensible approach to improve execution speed would be to refactor the code, st
 * Ensure variables are properly aligned in memory.
 * Reorganize the code such that the compiler can try to vectorize some of the operations.
 
-Another way to get more information about issues with the code is passing `-fopt-info-missed=missed.txt` flag to `gfortran` in the `Makefile`. When the compilation is done a file `missed.txt` will be generated with information of places in the code where the compiler was unable to apply an optimization.
+Another way to get more information about optimization issues with the code is passing `-fopt-info-missed=missed.txt` flag to `gfortran` in the `Makefile`. When the compilation is done a file `missed.txt` will be generated with information of places in the code where the compiler was unable to apply an optimization.
