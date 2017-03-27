@@ -5,8 +5,8 @@ htop
 make
 parallel
 procps
-python3-pip
-python3-virtualenv
+python-pip
+python-virtualenv
 the_silver_searcher
 time
 tmux
