@@ -5,4 +5,7 @@ ZGOUBI = 'zgoubi'
 
 
 def zgoubi():
+    """
+    Executes zgoubi, expects to find zgoubi in the PATH
+    """
     pksubprocess.check_call_with_signals([ZGOUBI])
