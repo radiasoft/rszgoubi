@@ -17,7 +17,7 @@ ZGOUBI_RES = 'zgoubi.res'
         'spiralFFAG-FFAG-SPI.res',
     ]
 )
-def test_SRDampingInESRFRing_coupled(test_file):
+def test_zgoubi_output(test_file):
     """
     Runs zgoubi for a selection of simulation results and compares the
     new results agains the old results.
