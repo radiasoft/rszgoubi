@@ -2,6 +2,7 @@ build_image_base=fedora:latest
 rszgoubi_dir="$HOME/src/rszgoubi"
 zgoubi_dir="$HOME/src/zgoubi"
 bin_dir="$HOME/bin"
+build_is_public=1
 
 build_zgoubi() {
     git clone -b rszgoubi --depth 1 https://github.com/radiasoft/zgoubi "$zgoubi_dir"
@@ -21,7 +22,7 @@ build_as_root() {
     cp ./bin/rszgoubi-run.sh /rszgoubi-run.sh
     chmod ugo+rx /rszgoubi-run.sh
     mkdir /zgoubi_results
-    chown vagrant: /zgoubi_results 
+    chown vagrant: /zgoubi_results
 }
 
 build_as_run_user() {
