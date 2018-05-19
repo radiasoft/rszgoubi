@@ -7,13 +7,7 @@ u"""rszgoubi setup script
 # All imports (except __future__) must come after this block.
 # setuptools, in particular, caches data about the current state
 # of modules so it has to be imported after the pykern import.
-try:
-    from pykern import pksetup
-except ImportError:
-    import pip
-    pip.main(['install', 'pykern'])
-    from pykern import pksetup
-
+from pykern import pksetup
 
 pksetup.setup(
     name='rszgoubi',
